@@ -151,7 +151,7 @@ func outputFile(logData string) {
 	_, err := os.Stat(logsDirectoryPath + monthDate)
 	if os.IsNotExist(err) {
 		if err = os.Mkdir(logsDirectoryPath+monthDate, 0777); err != nil {
-			log.Println("error create directory: " + logsDirectoryPath)
+			log.Println(fmt.Sprintf("error create directory (%s): %s", logsDirectoryPath, err.Error()))
 			return
 		}
 	}

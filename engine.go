@@ -13,8 +13,6 @@ import (
 )
 
 const (
-	logsDirectoryPath  = "logs/"
-	logFilePrefix      = "log-"
 	levelInfo          = "INFO"
 	levelWarning       = "WARNING"
 	levelError         = "ERROR"
@@ -25,6 +23,11 @@ const (
 	ReleaseMode        = "RELEASE"
 	errorJSON          = "json error"
 	RequestBodyKey     = "body_string"
+)
+
+var (
+	logsDirectoryPath = "logs/"
+	logFilePrefix     = "log-"
 )
 
 type LogData struct {
@@ -88,6 +91,10 @@ func SetMode(mode string) {
 
 func SetServerVersion(version string) {
 	serverVersion = version
+}
+
+func SetOutputDirectory(path string) {
+	logsDirectoryPath = path
 }
 
 func saveLogWithRequestData(message string, level string, extend interface{}, c *gin.Context) {

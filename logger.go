@@ -1,4 +1,4 @@
-package exlogger
+package exloggo
 
 import (
 	"fmt"

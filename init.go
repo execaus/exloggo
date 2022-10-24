@@ -26,9 +26,9 @@ const (
 )
 
 type Parameters struct {
-	Mode          *string
-	ServerVersion *string
-	Directory     *string
+	Mode          string
+	ServerVersion string
+	Directory     string
 }
 
 var loggerMode string
@@ -51,31 +51,31 @@ func SetParameters(params *Parameters) error {
 	return nil
 }
 
-func setMode(mode *string) error {
-	if mode != nil {
-		if *mode != DevelopmentMode && *mode != ReleaseMode {
+func setMode(mode string) error {
+	if mode != "" {
+		if mode != DevelopmentMode && mode != ReleaseMode {
 			return errors.New(errorInvalidMode)
 		}
 	} else {
 		loggerMode = DevelopmentMode
 		return nil
 	}
-	loggerMode = *mode
+	loggerMode = mode
 	return nil
 }
 
-func setServerVersion(version *string) {
-	if version == nil {
+func setServerVersion(version string) {
+	if version == "" {
 		serverVersion = defaultServerVersion
 		return
 	}
-	serverVersion = *version
+	serverVersion = version
 }
 
-func setOutputDirectory(path *string) {
-	if path == nil {
+func setOutputDirectory(path string) {
+	if path == "" {
 		logsDirectoryPath = defaultOutputDirectory
 		return
 	}
-	logsDirectoryPath = *path
+	logsDirectoryPath = path
 }

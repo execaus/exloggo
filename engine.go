@@ -13,21 +13,12 @@ import (
 )
 
 const (
-	levelInfo          = "INFO"
-	levelWarning       = "WARNING"
-	levelError         = "ERROR"
-	levelDebug         = "DEBUG"
-	levelFatal         = "FATAL"
-	levelRequestResult = "REQUEST_RESULT"
-	DevelopmentMode    = "DEVELOPMENT"
-	ReleaseMode        = "RELEASE"
-	errorJSON          = "json error"
-	RequestBodyKey     = "body_string"
+	errorJSON      = "json error"
+	RequestBodyKey = "body_string"
 )
 
 var (
-	logsDirectoryPath = "logs/"
-	logFilePrefix     = "log-"
+	logFilePrefix = "log-"
 )
 
 type LogData struct {
@@ -67,10 +58,6 @@ func (l *LogData) appendRequestData(c *gin.Context) error {
 	return nil
 }
 
-var loggerMode string
-var prefixPath string
-var serverVersion string
-
 func init() {
 	initRelative()
 	loggerMode = DevelopmentMode
@@ -83,18 +70,6 @@ func initRelative() {
 
 func getRelativePath(path string) string {
 	return strings.TrimPrefix(filepath.ToSlash(path), prefixPath)
-}
-
-func SetMode(mode string) {
-	loggerMode = mode
-}
-
-func SetServerVersion(version string) {
-	serverVersion = version
-}
-
-func SetOutputDirectory(path string) {
-	logsDirectoryPath = path
 }
 
 func saveLogWithRequestData(message string, level string, extend interface{}, c *gin.Context) {

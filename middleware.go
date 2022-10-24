@@ -25,7 +25,7 @@ type responseHeaders struct {
 func middleware(c *gin.Context) {
 	headers, err := getResponseHeaders(c)
 	if err != nil {
-		SendGeneralException(c, err.Error())
+		SendHeaderException(c, err.Error())
 		return
 	}
 	BindGoroutineRequestId(headers.RequestId, headers.ClientRequestId)

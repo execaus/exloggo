@@ -2,7 +2,10 @@ module github.com/execaus/exloggo
 
 go 1.19
 
-require github.com/gin-gonic/gin v1.8.1
+require (
+	github.com/gin-gonic/gin v1.8.1
+	github.com/uuid6/uuid6go-proto v0.2.1
+)
 
 require (
 	github.com/gin-contrib/sse v0.1.0 // indirect

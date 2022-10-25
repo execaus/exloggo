@@ -1,10 +1,31 @@
 package exloggo
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"os"
 )
+
+func SetParameters(params *Parameters) error {
+	if err := setMode(params.Mode); err != nil {
+		Error(errorInvalidMode, nil)
+		return err
+	}
+	setServerVersion(params.ServerVersion)
+	setOutputDirectory(params.Directory)
+
+	return nil
+}
+
+func GetResponseHeaders(c *gin.Context) (*ResponseHeaders, error) {
+	headers, exists := c.Get(ResponseHeadersKey)
+	if !exists {
+		Error(errorHeaders, nil)
+		return nil, errors.New(errorHeaders)
+	}
+	return headers.(*ResponseHeaders), nil
+}
 
 func Info(message string, extend interface{}) {
 	saveLog(message, levelInfo, extend)

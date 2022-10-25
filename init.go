@@ -40,17 +40,6 @@ func Inject(router *gin.Engine) {
 	router.Use(middleware)
 }
 
-func SetParameters(params *Parameters) error {
-	if err := setMode(params.Mode); err != nil {
-		Error(errorInvalidMode, nil)
-		return err
-	}
-	setServerVersion(params.ServerVersion)
-	setOutputDirectory(params.Directory)
-
-	return nil
-}
-
 func setMode(mode string) error {
 	if mode != "" {
 		if mode != DevelopmentMode && mode != ReleaseMode {

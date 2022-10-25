@@ -3,19 +3,21 @@ package exloggo
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"reflect"
 	"time"
 )
 
 const (
 	errorHeaders       = "an error occurred while working with headers"
+	RequestHeadersKey  = "ExGoLogRequestHeadersKey"
 	ResponseHeadersKey = "ExGoLogResponseHeadersKey"
 )
 
-type requestHeaders struct {
+type RequestHeaders struct {
 	ClientRequestId string `header:"Client-Request-ID" binding:"required,uuid"`
 }
 
-type responseHeaders struct {
+type ResponseHeaders struct {
 	RequestTime       time.Time
 	RequestTimeString string `header:"Timestamp" binding:"required,datetime=Mon, 02 Jan 2006 15:04:05 MST"`
 	ClientRequestId   string `header:"Client-Request-ID" binding:"required,uuid"`
@@ -23,20 +25,44 @@ type responseHeaders struct {
 }
 
 func middleware(c *gin.Context) {
-	headers, err := getResponseHeaders(c)
-	if err != nil {
+	var requestHeaders RequestHeaders
+	var requestTime = time.Now().UTC()
+
+	if err := c.ShouldBindHeader(&requestHeaders); err != nil {
 		SendHeaderException(c, err.Error())
 		return
 	}
-	BindGoroutineRequestId(headers.RequestId, headers.ClientRequestId)
+
+	responseHeaders := ResponseHeaders{
+		RequestTimeString: requestTime.Format(time.RFC1123),
+		ClientRequestId:   requestHeaders.ClientRequestId,
+		RequestTime:       requestTime,
+		RequestId:         GetUUIDv7(),
+	}
+
+	c.Set(RequestHeadersKey, &requestHeaders)
+	c.Set(ResponseHeadersKey, &responseHeaders)
+
+	if err := setResponseHeaders(c, &responseHeaders); err != nil {
+		SendGeneralException(c, errorHeaders)
+		return
+	}
+
 	c.Next()
 }
 
-func getResponseHeaders(c *gin.Context) (*responseHeaders, error) {
-	headers, exists := c.Get(ResponseHeadersKey)
-	if !exists {
-		Error(errorHeaders, nil)
-		return nil, errors.New(errorHeaders)
+func setResponseHeaders(c *gin.Context, headers interface{}) error {
+	a := reflect.ValueOf(headers)
+	fieldsCount := reflect.ValueOf(headers).Elem().NumField()
+	if a.Kind() != reflect.Ptr {
+		Error("wrong type struct", nil)
+		return errors.New("wrong type struct")
 	}
-	return headers.(*responseHeaders), nil
+	for x := 0; x < fieldsCount; x++ {
+		headerName := reflect.TypeOf(headers).Elem().Field(x).Tag.Get("header")
+		value := reflect.ValueOf(headers).Elem().Field(x).String()
+		c.Header(headerName, value)
+	}
+
+	return nil
 }

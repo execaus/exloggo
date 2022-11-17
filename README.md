@@ -126,7 +126,7 @@ The ```code``` property contains one of the possible values listed below. Applic
 
 ---
 
-| Код состояния | Сообщение о состоянии     | Описание                                                                                       |
+| Status code   | Status message            | Description                                                                                    |
 |---------------|---------------------------|------------------------------------------------------------------------------------------------|
 | 200           | Success                   | The request was successful.                                                                    |
 | 204           | No content                | The request was successful and the response does not contain a body.                           |

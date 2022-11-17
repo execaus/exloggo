@@ -2,7 +2,6 @@ package exloggo
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -35,10 +34,6 @@ var loggerMode string
 var prefixPath string
 var serverVersion string
 var logsDirectoryPath string
-
-func Inject(router *gin.Engine) {
-	router.Use(middleware)
-}
 
 func setMode(mode string) error {
 	if mode != "" {

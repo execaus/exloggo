@@ -24,7 +24,7 @@ type ResponseHeaders struct {
 	RequestId         string `header:"Request-ID" binding:"required,uuid"`
 }
 
-func middleware(c *gin.Context) {
+func ExMiddleware(c *gin.Context) {
 	var requestHeaders RequestHeaders
 	var requestTime = time.Now().UTC()
 

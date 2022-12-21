@@ -20,7 +20,10 @@ func SetParameters(params *Parameters) error {
 
 func GetContextBody() *ContextBody {
 	ctx := context.Background()
-	body, _ := contextBodyStore.Load(ctx)
+	body, ok := contextBodyStore.Load(ctx)
+	if !ok {
+		return nil
+	}
 	return body.(*ContextBody)
 }
 

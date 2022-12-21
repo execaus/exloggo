@@ -1,9 +1,7 @@
 package exloggo
 
-import uuid "github.com/uuid6/uuid6go-proto"
+import "github.com/google/uuid"
 
-var uuidGenerator = uuid.UUIDv7Generator{CounterPrecisionLength: 12}
-
-func GetUUIDv7() string {
-	return uuidGenerator.Next().ToString()
+func GetUUID() string {
+	return uuid.New().String()
 }

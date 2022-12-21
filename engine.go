@@ -44,7 +44,7 @@ func (l *LogData) appendRequestData(c *gin.Context) error {
 	body := getRequestBody(c)
 	headers, err := getRequestHeaders(c)
 	if err != nil {
-		Error(err.Error(), nil)
+		Error(err.Error())
 		return err
 	}
 
@@ -75,7 +75,7 @@ func getRelativePath(path string) string {
 func saveLogWithRequestData(message string, level string, extend interface{}, c *gin.Context) {
 	foundation := getFoundationLogData(message, level)
 	if err := foundation.appendRequestData(c); err != nil {
-		Error(err.Error(), nil)
+		Error(err.Error())
 	}
 	outputLogData(foundation, extend)
 }
@@ -110,16 +110,15 @@ func getFoundationLogData(message string, level string) *LogData {
 		_, file, line, _ = runtime.Caller(3)
 	}
 	point := fmt.Sprintf(`%s:%d`, getRelativePath(file), line)
-	requestId := GetGoroutineRequestId()
-	clientRequestId := GetGoroutineRequestClientId()
 	timestamp := time.Now().UTC().Format(time.RFC3339)
+	contextBody := GetContextBody()
 
 	return &LogData{
 		Level:           level,
 		Message:         message,
 		Point:           point,
-		RequestId:       requestId,
-		ClientRequestId: clientRequestId,
+		RequestId:       contextBody.ResponseHeaders.RequestId,
+		ClientRequestId: contextBody.ResponseHeaders.ClientRequestId,
 		Timestamp:       timestamp,
 		ServerVersion:   serverVersion,
 	}
@@ -165,7 +164,7 @@ func getRequestBody(c *gin.Context) interface{} {
 		return nil
 	}
 	if err := json.Unmarshal([]byte(stringBody), &body); err != nil {
-		Error(err.Error(), nil)
+		Error(err.Error())
 	}
 	return body
 }

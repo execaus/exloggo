@@ -1,7 +1,7 @@
 package exloggo
 
 import (
-	"errors"
+	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"os"
@@ -9,7 +9,7 @@ import (
 
 func SetParameters(params *Parameters) error {
 	if err := setMode(params.Mode); err != nil {
-		Error(errorInvalidMode, nil)
+		Error(errorInvalidMode)
 		return err
 	}
 	setServerVersion(params.ServerVersion)
@@ -18,71 +18,132 @@ func SetParameters(params *Parameters) error {
 	return nil
 }
 
-func GetResponseHeaders(c *gin.Context) (*ResponseHeaders, error) {
-	headers, exists := c.Get(ResponseHeadersKey)
-	if !exists {
-		Error(errorHeaders, nil)
-		return nil, errors.New(errorHeaders)
+func GetContextBody() *ContextBody {
+	ctx := context.Background()
+	body, ok := contextBodyStore.Load(ctx)
+	if !ok {
+		fmt.Println("exloggo: context not found")
+		return nil
 	}
-	return headers.(*ResponseHeaders), nil
+
+	return body.(*ContextBody)
 }
 
-func Info(message string, extend interface{}) {
+func Info(message string) {
+	saveLog(message, levelInfo, nil)
+}
+
+func InfoWithExtension(message string, extend interface{}) {
 	saveLog(message, levelInfo, extend)
 }
 
-func Infof(template string, extend interface{}, a ...any) {
+func Infof(template string, a ...any) {
+	message := fmt.Sprintf(template, a)
+	saveLog(message, levelInfo, nil)
+}
+
+func InfofWithExtension(template string, extend interface{}, a ...any) {
 	message := fmt.Sprintf(template, a)
 	saveLog(message, levelInfo, extend)
 }
 
-func Warning(message string, extend interface{}) {
+func Warning(message string) {
+	saveLog(message, levelWarning, nil)
+}
+func WarningWithExtension(message string, extend interface{}) {
 	saveLog(message, levelWarning, extend)
 }
 
-func Warningf(template string, extend interface{}, a ...any) {
+func Warningf(template string, a ...any) {
+	message := fmt.Sprintf(template, a)
+	saveLog(message, levelWarning, nil)
+}
+
+func WarningfWithExtension(template string, extend interface{}, a ...any) {
 	message := fmt.Sprintf(template, a)
 	saveLog(message, levelWarning, extend)
 }
 
-func Error(message string, extend interface{}) {
+func Error(message string) {
+	saveLog(message, levelError, nil)
+}
+
+func ErrorWithExtension(message string, extend interface{}) {
 	saveLog(message, levelError, extend)
 }
 
-func Errorf(template string, extend interface{}, a ...any) {
+func Errorf(template string, a ...any) {
+	message := fmt.Sprintf(template, a)
+	saveLog(message, levelError, nil)
+}
+
+func ErrorfWithExtension(template string, extend interface{}, a ...any) {
 	message := fmt.Sprintf(template, a)
 	saveLog(message, levelError, extend)
 }
 
-func Debug(message string, extend interface{}) {
+func Debug(message string) {
+	if loggerMode == DevelopmentMode {
+		saveLog(message, levelDebug, nil)
+	}
+}
+
+func DebugWithExtension(message string, extend interface{}) {
 	if loggerMode == DevelopmentMode {
 		saveLog(message, levelDebug, extend)
 	}
 }
 
-func Debugf(template string, extend interface{}, a ...any) {
+func Debugf(template string, a ...any) {
+	message := fmt.Sprintf(template, a)
+	if loggerMode == DevelopmentMode {
+		saveLog(message, levelDebug, nil)
+	}
+}
+
+func DebugfWithExtension(template string, extend interface{}, a ...any) {
 	message := fmt.Sprintf(template, a)
 	if loggerMode == DevelopmentMode {
 		saveLog(message, levelDebug, extend)
 	}
 }
 
-func Fatal(message string, extend interface{}) {
+func Fatal(message string) {
+	saveLog(message, levelFatal, nil)
+	os.Exit(1)
+}
+
+func FatalWithExtension(message string, extend interface{}) {
 	saveLog(message, levelFatal, extend)
 	os.Exit(1)
 }
 
-func Fatalf(template string, extend interface{}, a ...any) {
+func Fatalf(template string, a ...any) {
+	message := fmt.Sprintf(template, a)
+	saveLog(message, levelFatal, nil)
+	os.Exit(1)
+}
+
+func FatalfWithExtension(template string, extend interface{}, a ...any) {
 	message := fmt.Sprintf(template, a)
 	saveLog(message, levelFatal, extend)
 	os.Exit(1)
 }
 
-func RequestResult(message string, extend interface{}, c *gin.Context) {
+func RequestResult(c *gin.Context, message string) {
+	saveLogWithRequestData(message, levelRequestResult, nil, c)
+}
+
+func RequestResultWithExtension(c *gin.Context, message string, extend interface{}) {
 	saveLogWithRequestData(message, levelRequestResult, extend, c)
 }
 
-func RequestResultf(template string, extend interface{}, c *gin.Context, a ...any) {
+func RequestResultf(c *gin.Context, template string, a ...any) {
+	message := fmt.Sprintf(template, a)
+	saveLogWithRequestData(message, levelRequestResult, nil, c)
+}
+
+func RequestResultfWithExtension(c *gin.Context, template string, extend interface{}, a ...any) {
 	message := fmt.Sprintf(template, a)
 	saveLogWithRequestData(message, levelRequestResult, extend, c)
 }

@@ -1,16 +1,15 @@
 package exloggo
 
 import (
-	"errors"
+	"context"
 	"github.com/gin-gonic/gin"
-	"reflect"
+	"sync"
 	"time"
 )
 
 const (
-	errorHeaders       = "an error occurred while working with headers"
-	RequestHeadersKey  = "ExGoLogRequestHeadersKey"
-	ResponseHeadersKey = "ExGoLogResponseHeadersKey"
+	headerExceptionStatus = 432
+	headerError           = "an error occurred while working with headers"
 )
 
 type RequestHeaders struct {
@@ -24,12 +23,19 @@ type ResponseHeaders struct {
 	RequestId         string `header:"Request-ID" binding:"required,uuid"`
 }
 
-func ExMiddleware(c *gin.Context) {
+type ContextBody struct {
+	RequestHeaders  *RequestHeaders
+	ResponseHeaders *ResponseHeaders
+}
+
+var contextBodyStore sync.Map
+
+func Middleware(c *gin.Context) {
 	var requestHeaders RequestHeaders
 	var requestTime = time.Now().UTC()
 
 	if err := c.ShouldBindHeader(&requestHeaders); err != nil {
-		SendHeaderException(c, err.Error())
+		c.AbortWithStatusJSON(headerExceptionStatus, headerError)
 		return
 	}
 
@@ -37,32 +43,18 @@ func ExMiddleware(c *gin.Context) {
 		RequestTimeString: requestTime.Format(time.RFC1123),
 		ClientRequestId:   requestHeaders.ClientRequestId,
 		RequestTime:       requestTime,
-		RequestId:         GetUUIDv7(),
+		RequestId:         GetUUID(),
 	}
 
-	c.Set(RequestHeadersKey, &requestHeaders)
-	c.Set(ResponseHeadersKey, &responseHeaders)
-
-	if err := setResponseHeaders(c, &responseHeaders); err != nil {
-		SendGeneralException(c, errorHeaders)
-		return
+	body := ContextBody{
+		RequestHeaders:  &requestHeaders,
+		ResponseHeaders: &responseHeaders,
 	}
+
+	ctx := context.Background()
+	contextBodyStore.Store(ctx, &body)
 
 	c.Next()
-}
 
-func setResponseHeaders(c *gin.Context, headers interface{}) error {
-	a := reflect.ValueOf(headers)
-	fieldsCount := reflect.ValueOf(headers).Elem().NumField()
-	if a.Kind() != reflect.Ptr {
-		Error("wrong type struct", nil)
-		return errors.New("wrong type struct")
-	}
-	for x := 0; x < fieldsCount; x++ {
-		headerName := reflect.TypeOf(headers).Elem().Field(x).Tag.Get("header")
-		value := reflect.ValueOf(headers).Elem().Field(x).String()
-		c.Header(headerName, value)
-	}
-
-	return nil
+	contextBodyStore.Delete(ctx)
 }

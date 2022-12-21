@@ -2,6 +2,6 @@ package exloggo
 
 import "github.com/google/uuid"
 
-func GetUUID() string {
+func getUUID() string {
 	return uuid.New().String()
 }

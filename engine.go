@@ -19,6 +19,7 @@ const (
 
 var (
 	logFilePrefix = "log-"
+	systemLogging = "system logging"
 )
 
 type LogData struct {
@@ -112,6 +113,17 @@ func getFoundationLogData(message string, level string) *LogData {
 	point := fmt.Sprintf(`%s:%d`, getRelativePath(file), line)
 	timestamp := time.Now().UTC().Format(time.RFC3339)
 	contextBody := GetContextBody()
+	if contextBody == nil {
+		return &LogData{
+			Level:           level,
+			Message:         message,
+			Point:           point,
+			RequestId:       systemLogging,
+			ClientRequestId: systemLogging,
+			Timestamp:       timestamp,
+			ServerVersion:   serverVersion,
+		}
+	}
 
 	return &LogData{
 		Level:           level,

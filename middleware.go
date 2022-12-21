@@ -43,7 +43,7 @@ func Middleware(c *gin.Context) {
 		RequestTimeString: requestTime.Format(time.RFC1123),
 		ClientRequestId:   requestHeaders.ClientRequestId,
 		RequestTime:       requestTime,
-		RequestId:         GetUUID(),
+		RequestId:         getUUID(),
 	}
 
 	body := ContextBody{

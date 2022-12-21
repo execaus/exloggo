@@ -141,21 +141,22 @@ func outputFile(logData string) {
 
 	timeNow := time.Now().UTC()
 
-	monthDate := fmt.Sprintf(`%d-%.2d`, timeNow.Year(), timeNow.Month())
-
 	date := fmt.Sprintf(`%d-%.2d-%.2d`, timeNow.Year(), timeNow.Month(), timeNow.Day())
+
+	monthDate := fmt.Sprintf(`%d-%.2d`, timeNow.Year(), timeNow.Month())
 	monthPath := fmt.Sprintf(`%s/%s`, logsDirectoryPath, monthDate)
+
 	filePath := fmt.Sprintf(`%s/%s/%s%s.txt`, logsDirectoryPath, monthDate, logFilePrefix, date)
 
 	_, err := os.Stat(filePath)
 	if os.IsNotExist(err) {
 		if err = os.MkdirAll(monthPath, 0777); err != nil {
-			log.Println("error mkdir all: " + filePath)
+			log.Println(fmt.Sprintf(`%s: %s: %s`, "error mkdir all", err.Error(), monthPath))
 			return
 		}
 		_, err = os.Create(filePath)
 		if err != nil {
-			log.Println("error create log file: " + filePath)
+			log.Println(fmt.Sprintf(`%s: %s: %s`, "error create log file", err.Error(), filePath))
 			return
 		}
 	}

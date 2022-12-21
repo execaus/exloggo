@@ -140,9 +140,18 @@ func outputFile(logData string) {
 	var file *os.File
 
 	timeNow := time.Now().UTC()
+
+	_, err := os.Stat(logsDirectoryPath)
+	if os.IsNotExist(err) {
+		if err = os.Mkdir(logsDirectoryPath, 0777); err != nil {
+			log.Println(fmt.Sprintf("error create directory (%s): %s", logsDirectoryPath, err.Error()))
+			return
+		}
+	}
+
 	monthDate := fmt.Sprintf(`%d-%.2d`, timeNow.Year(), timeNow.Month())
 	monthDatePath := fmt.Sprintf("%s/%s", logsDirectoryPath, monthDate)
-	_, err := os.Stat(monthDatePath)
+	_, err = os.Stat(monthDatePath)
 	if os.IsNotExist(err) {
 		if err = os.Mkdir(monthDatePath, 0777); err != nil {
 			log.Println(fmt.Sprintf("error create directory (%s): %s", monthDatePath, err.Error()))

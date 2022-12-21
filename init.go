@@ -20,7 +20,7 @@ const (
 
 const (
 	defaultServerVersion   = "dev"
-	defaultOutputDirectory = "logs/"
+	defaultOutputDirectory = "/logs"
 	defaultMode            = DevelopmentMode
 )
 

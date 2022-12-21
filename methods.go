@@ -20,12 +20,7 @@ func SetParameters(params *Parameters) error {
 
 func GetContextBody() *ContextBody {
 	ctx := context.Background()
-	body, ok := contextBodyStore.Load(ctx)
-	if !ok {
-		fmt.Println("exloggo: context not found")
-		return nil
-	}
-
+	body, _ := contextBodyStore.Load(ctx)
 	return body.(*ContextBody)
 }
 

@@ -144,18 +144,20 @@ func outputFile(logData string) {
 	monthDate := fmt.Sprintf(`%d-%.2d`, timeNow.Year(), timeNow.Month())
 
 	date := fmt.Sprintf(`%d-%.2d-%.2d`, timeNow.Year(), timeNow.Month(), timeNow.Day())
+	monthPath := fmt.Sprintf(`%s/%s`, logsDirectoryPath, monthDate)
 	filePath := fmt.Sprintf(`%s/%s/%s%s.txt`, logsDirectoryPath, monthDate, logFilePrefix, date)
-	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0777)
-	if err != nil {
-		if os.IsNotExist(err) {
-			if err = os.Mkdir(filePath, 0777); err != nil {
-				log.Println(fmt.Sprintf("error create directory (%s): %s", filePath, err.Error()))
-				return
-			}
-		}
 
-		log.Println("error open log file: " + filePath)
-		return
+	_, err := os.Stat(filePath)
+	if os.IsNotExist(err) {
+		if err = os.MkdirAll(monthPath, 0777); err != nil {
+			log.Println("error mkdir all: " + filePath)
+			return
+		}
+		_, err = os.Create(filePath)
+		if err != nil {
+			log.Println("error create log file: " + filePath)
+			return
+		}
 	}
 
 	file, err = os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0777)

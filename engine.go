@@ -150,7 +150,7 @@ func outputFile(logData string) {
 	}
 
 	date := fmt.Sprintf(`%d-%.2d-%.2d`, timeNow.Year(), timeNow.Month(), timeNow.Day())
-	filePath := fmt.Sprintf(`%s%s/%s%s.txt`, logsDirectoryPath, monthDate, logFilePrefix, date)
+	filePath := fmt.Sprintf(`%s/%s/%s%s.txt`, logsDirectoryPath, monthDate, logFilePrefix, date)
 	file, err = os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
 		log.Println("error open log file: " + filePath)

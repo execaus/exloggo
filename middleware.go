@@ -10,6 +10,7 @@ import (
 const (
 	headerExceptionStatus = 432
 	headerError           = "an error occurred while working with headers"
+	headerEmpty           = "empty field"
 )
 
 type RequestHeaders struct {
@@ -30,13 +31,40 @@ type ContextBody struct {
 
 var contextBodyStore sync.Map
 
-func Middleware(c *gin.Context) {
+func MiddlewareWithRequiredHeaders(c *gin.Context) {
 	var requestHeaders RequestHeaders
 	var requestTime = time.Now().UTC()
 
 	if err := c.ShouldBindHeader(&requestHeaders); err != nil {
 		c.AbortWithStatusJSON(headerExceptionStatus, headerError)
 		return
+	}
+
+	responseHeaders := ResponseHeaders{
+		RequestTimeString: requestTime.Format(time.RFC1123),
+		ClientRequestId:   requestHeaders.ClientRequestId,
+		RequestTime:       requestTime,
+		RequestId:         getUUID(),
+	}
+
+	body := ContextBody{
+		RequestHeaders:  &requestHeaders,
+		ResponseHeaders: &responseHeaders,
+	}
+
+	ctx := context.Background()
+	contextBodyStore.Store(ctx, &body)
+
+	c.Next()
+
+	contextBodyStore.Delete(ctx)
+}
+
+func Middleware(c *gin.Context) {
+	var requestTime = time.Now().UTC()
+
+	requestHeaders := RequestHeaders{
+		ClientRequestId: headerEmpty,
 	}
 
 	responseHeaders := ResponseHeaders{

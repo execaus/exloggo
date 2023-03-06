@@ -61,7 +61,7 @@ func MiddlewareWithRequiredHeaders(c *gin.Context) {
 }
 
 func Middleware(c *gin.Context) {
-	var requestTime = time.Now().UTC()
+	var requestTime = time.Now().UTC().Round(time.Second)
 
 	requestHeaders := RequestHeaders{
 		ClientRequestId: headerEmpty,

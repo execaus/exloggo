@@ -33,7 +33,7 @@ var contextBodyStore sync.Map
 
 func MiddlewareWithRequiredHeaders(c *gin.Context) {
 	var requestHeaders RequestHeaders
-	var requestTime = time.Now().UTC()
+	var requestTime = time.Now().UTC().Round(time.Second)
 
 	if err := c.ShouldBindHeader(&requestHeaders); err != nil {
 		c.AbortWithStatusJSON(headerExceptionStatus, headerError)

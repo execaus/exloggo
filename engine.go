@@ -26,6 +26,7 @@ type LogData struct {
 	Level           string       `json:"level"`
 	Message         string       `json:"message"`
 	Point           string       `json:"point"`
+	FilePoint       string       `json:"file_point"`
 	RequestId       string       `json:"request_id"`
 	ClientRequestId string       `json:"client_request_id"`
 	Timestamp       string       `json:"timestamp"`
@@ -104,13 +105,25 @@ func outputLogData(foundation *LogData, extend interface{}) {
 func getFoundationLogData(message string, level string) *LogData {
 	var file string
 	var line int
+	var filePoint string
 
 	if level == levelRequestResult {
 		_, file, line, _ = runtime.Caller(4)
 	} else {
 		_, file, line, _ = runtime.Caller(3)
 	}
+
+	switch runtime.GOOS {
+	case "linux", "darwin":
+		filePoint = fmt.Sprintf("file://%s:%d", file, line)
+	case "windows":
+		filePoint = fmt.Sprintf("file:///%s:%d", file, line)
+	default:
+		filePoint = fmt.Sprintf("%s:%d", file, line)
+	}
+
 	point := fmt.Sprintf(`%s:%d`, getRelativePath(file), line)
+
 	timestamp := time.Now().UTC().Format(time.RFC3339)
 	contextBody := GetContextBody()
 	if contextBody == nil {
@@ -118,6 +131,7 @@ func getFoundationLogData(message string, level string) *LogData {
 			Level:           level,
 			Message:         message,
 			Point:           point,
+			FilePoint:       filePoint,
 			RequestId:       systemLogging,
 			ClientRequestId: systemLogging,
 			Timestamp:       timestamp,
@@ -129,6 +143,7 @@ func getFoundationLogData(message string, level string) *LogData {
 		Level:           level,
 		Message:         message,
 		Point:           point,
+		FilePoint:       filePoint,
 		RequestId:       contextBody.ResponseHeaders.RequestId,
 		ClientRequestId: contextBody.ResponseHeaders.ClientRequestId,
 		Timestamp:       timestamp,
